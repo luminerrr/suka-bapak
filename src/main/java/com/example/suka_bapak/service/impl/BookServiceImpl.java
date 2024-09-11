@@ -16,19 +16,18 @@ import org.springframework.stereotype.Service;
 import com.example.suka_bapak.dto.response.books.GetBooksDto;
 import com.example.suka_bapak.dto.response.books.GetOverdueBooksResponseDto;
 import com.example.suka_bapak.entity.BookEntity;
-import com.example.suka_bapak.entity.PatronEntity;
 import com.example.suka_bapak.entity.TransactionEntity;
 import com.example.suka_bapak.mapper.BookMapper;
 import com.example.suka_bapak.repository.BookRepository;
 import com.example.suka_bapak.repository.PatronRepository;
 import com.example.suka_bapak.service.BookService;
 
-import java.awt.print.Book;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -41,10 +40,6 @@ public class BookServiceImpl implements BookService {
 
     @Autowired
     private TransactionRepository transactionRepository;
-
-    @Autowired
-    private PatronRepository patronRepository;
-
 
     @Override
     public ResponseEntity<Page<GetBooksDto>> getAllBooks(Pageable page) {
@@ -131,6 +126,7 @@ public class BookServiceImpl implements BookService {
         LocalDate today = LocalDate.now();
         List<TransactionEntity> overdueTransactions = transactionRepository.findByDueDateBefore(today);
         List<GetOverdueBooksResponseDto> response = new ArrayList<>();
+        // Map from entity to dto and count overdue days & fees
         for (TransactionEntity transaction : overdueTransactions) {
             GetOverdueBooksResponseDto dto = new GetOverdueBooksResponseDto();
             dto.setBookTitle(transaction.getBook().getTitle());
@@ -147,4 +143,21 @@ public class BookServiceImpl implements BookService {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    public ResponseEntity<Object> checkBookAvailability(Long book_id) {
+        BookEntity book = bookRepository.findById(book_id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        // Get the number of books currently borrowed (active loans)
+        int activeLoans = transactionRepository.countByBook_IdAndReturnDateIsNull(book_id);
+
+        // Calculate available copies
+        int availableCopies = book.getQuantity() - activeLoans;
+
+        // Create the response
+        Map<String, Object> response = new HashMap<>();
+        response.put("book_title", book.getTitle());
+        response.put("available_copies", availableCopies);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

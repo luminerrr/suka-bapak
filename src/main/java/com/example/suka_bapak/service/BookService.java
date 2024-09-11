@@ -23,6 +23,8 @@ public interface BookService {
 
     BookEntity getBookById(Long id);
 
+    ResponseEntity<Object> checkBookAvailability(Long book_id);
+
     void deleteBook(Long bookId);
 
     ResponseEntity<List<GetOverdueBooksResponseDto>> getOverdueBooks();

@@ -95,4 +95,8 @@ public class BookController {
         return bookService.getOverdueBooks();
     }
 
+    @GetMapping("/{book_id}/availability")
+    public ResponseEntity<Object> checkBookAvailability(@PathVariable Long book_id) {
+        return bookService.checkBookAvailability(book_id);
+    }
 }
