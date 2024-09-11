@@ -1,15 +1,18 @@
 package com.example.suka_bapak.controller;
 
+import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
+import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
 import com.example.suka_bapak.entity.PatronEntity;
+import com.example.suka_bapak.exception.ValidationException;
 import com.example.suka_bapak.service.PatronService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/patrons")
@@ -19,13 +22,13 @@ public class PatronController {
     private PatronService patronService;
 
 //    Get all patrons
-    @GetMapping()
-    public List<PatronEntity> getAllPatrons() {
-        return patronService.getAllPatrons();
+    @GetMapping
+    public ResponseEntity<Page<GetPatronDto>> getAllPatrons(Pageable page) {
+        return patronService.getAllPatrons(page);
     }
 
-//    Get patron by a certain id
-    @GetMapping("/{id}")
+    //    Get patron by a certain id
+    @GetMapping("/{patron_id}")
     public ResponseEntity<PatronEntity> getPatronById(
             @PathVariable Long id
     ){
@@ -36,4 +39,29 @@ public class PatronController {
             return ResponseEntity.notFound().build();
         }
     }
+
+//    Create new patron
+    @PostMapping
+    public ResponseEntity<PatronEntity> createPatron(
+            @RequestBody CreatePatronRequest patron
+    ){
+        PatronEntity savedPatron = patronService.createPatron(patron);
+        return ResponseEntity.ok(savedPatron);
+    }
+
+//    Update patron
+    @PutMapping("/{patron_id}")
+    public ResponseEntity<?> updatePatron(
+            @PathVariable ("patron_id") Long id,
+            @RequestBody CreatePatronRequest createPatronRequest) {
+        try {
+            patronService.updatePatron(id, createPatronRequest);
+            return new ResponseEntity<>(Map.of("message", "Patron details updated successfully."), HttpStatus.OK);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(Map.of("error", "Patron not found."), HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

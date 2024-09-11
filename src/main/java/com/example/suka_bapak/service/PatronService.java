@@ -1,23 +1,24 @@
 package com.example.suka_bapak.service;
 
+import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
+import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
 import com.example.suka_bapak.entity.PatronEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 @Component
 public interface PatronService {
 
-    List<PatronEntity> getAllPatrons();
+    ResponseEntity<Page<GetPatronDto>> getAllPatrons(Pageable page);
 
     PatronEntity getPatronById (Long id);
 
-    PatronEntity savePatron (PatronEntity patron);
+    PatronEntity createPatron (CreatePatronRequest createPatronRequest);
 
-    void deletePatron(Long id);
-
-    Page<PatronEntity> getPatrons(Pageable pageable);
+    PatronEntity updatePatron (Long id, CreatePatronRequest createPatronRequest);
 
 }
+

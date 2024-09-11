@@ -7,4 +7,5 @@ import com.example.suka_bapak.entity.BookEntity;
 
 public interface BookRepository extends JpaRepository<BookEntity, Long> {
     Page<BookEntity> findAll(Pageable page);
-    boolean existsByIsbn(String isbn);}
+    boolean existsByIsbn(String isbn);
+}

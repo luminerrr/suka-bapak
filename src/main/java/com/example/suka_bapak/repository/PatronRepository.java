@@ -8,4 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PatronRepository extends JpaRepository<PatronEntity, Long> {
 
     Page<PatronEntity> findAll(Pageable pageable);
+
+    boolean existsByEmail(String email);
+
 }

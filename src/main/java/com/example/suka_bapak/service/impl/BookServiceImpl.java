@@ -1,6 +1,6 @@
 package com.example.suka_bapak.service.impl;
 
-import com.example.suka_bapak.dto.request.CreateBookRequest;
+import com.example.suka_bapak.dto.request.books.CreateBookRequest;
 import com.example.suka_bapak.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 
