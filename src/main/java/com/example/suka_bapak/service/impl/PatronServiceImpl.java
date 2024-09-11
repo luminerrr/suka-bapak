@@ -11,6 +11,7 @@ import com.example.suka_bapak.mapper.PatronMapper;
 import com.example.suka_bapak.repository.PatronRepository;
 import com.example.suka_bapak.repository.TransactionRepository;
 import com.example.suka_bapak.service.PatronService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -89,13 +90,16 @@ public class PatronServiceImpl implements PatronService {
     }
 
     @Override
-    public void deletePatron(Long id) {
-        PatronEntity existingPatron = patronRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Patron not found."));
+    public void deletePatron(Long id) throws ValidationException {
+        PatronEntity patron = patronRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Patron id is not found: " + id));
 
-//        validatePatronLoan(id);
+        List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndReturnDateIsNull(id);
+        if (!hasActiveLoans.isEmpty()) {
+            throw new ValidationException("Cannot delete patron with active loans.");
+        }
 
-        patronRepository.deleteById(id);
+        patronRepository.delete(patron);
     }
 
     private void validatePatronRequest(CreatePatronRequest request) {
@@ -115,13 +119,6 @@ public class PatronServiceImpl implements PatronService {
         }
     }
 
-
-    private void validatePatronLoan(Long id) {
-        List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndReturnDateIsNull(id);
-        if (!hasActiveLoans.isEmpty()) {
-            throw new ValidationException("Cannot delete patron with active loans.");
-        }
-    }
 
     @Override
     public ResponseEntity<List<GetPatronTransactionHistoryResponseDto>> getTransactionHistory(Long id) {
