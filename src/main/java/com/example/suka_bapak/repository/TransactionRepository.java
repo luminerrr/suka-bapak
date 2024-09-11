@@ -14,7 +14,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
 
 
     List<TransactionEntity> findByPatron_IdAndReturnDateIsNull(Long patronId);
-
     boolean existsByBookIdAndReturnDateIsNull(Long bookId);
+    int countByBook_IdAndReturnDateIsNull(Long bookId);
     List<TransactionEntity>findByPatron_IdAndReturnDateIsNotNull(Long patronId);
 }

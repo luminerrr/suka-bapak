@@ -21,6 +21,7 @@ import com.example.suka_bapak.service.BookService;
 import java.awt.print.Book;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -114,4 +115,21 @@ public class BookServiceImpl implements BookService {
         bookRepository.delete(book);
     }
 
+    public ResponseEntity<Object> checkBookAvailability(Long book_id) {
+        BookEntity book = bookRepository.findById(book_id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        // Get the number of books currently borrowed (active loans)
+        int activeLoans = transactionRepository.countByBook_IdAndReturnDateIsNull(book_id);
+
+        // Calculate available copies
+        int availableCopies = book.getQuantity() - activeLoans;
+
+        // Create the response
+        Map<String, Object> response = new HashMap<>();
+        response.put("book_title", book.getTitle());
+        response.put("available_copies", availableCopies);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
