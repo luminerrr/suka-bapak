@@ -46,7 +46,15 @@ public class TransactionServiceImpl implements TransactionService {
         BookEntity book = bookOpt.get();
         PatronEntity patron = patronOpt.get();
 
-        // TODO: Check if patron could borrow more books
+        String membershipType = patron.getMembership_type().toLowerCase();
+        Integer maxBorrow = membershipType.equals("regular") ? GeneralConstant.MAX_BORROW_REGULAR : GeneralConstant.MAX_BORROW_PREMIUM;
+        Integer currentBorrow = transactionRepository.countByPatron_IdAndReturnDateIsNull(patron.getId());
+        System.out.println(membershipType);
+        System.out.println(currentBorrow);
+        System.out.println(maxBorrow);
+        if(currentBorrow >= maxBorrow) {
+            throw new ValidationException("This patron already maxed out the borrow");
+        }
 
         // Check if book have available copies
         if (book.getAvailable_copies() <= 0) {
