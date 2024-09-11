@@ -2,13 +2,18 @@ package com.example.suka_bapak.service.impl;
 
 import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
 import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
+import com.example.suka_bapak.dto.response.patrons.GetPatronTransactionHistoryResponseDto;
 import com.example.suka_bapak.entity.PatronEntity;
+import com.example.suka_bapak.entity.TransactionEntity;
 import com.example.suka_bapak.exception.ValidationException;
 import com.example.suka_bapak.mapper.PatronMapper;
 import com.example.suka_bapak.repository.PatronRepository;
+import com.example.suka_bapak.repository.TransactionRepository;
 import com.example.suka_bapak.service.PatronService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +32,9 @@ public class PatronServiceImpl implements PatronService {
 
     @Autowired
     private PatronMapper patronMapper;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Override
     public PatronEntity getPatronById(Long id) {
@@ -83,16 +91,33 @@ public class PatronServiceImpl implements PatronService {
             throw new ValidationException("Invalid email or missing required fields.");
         }
         String email = request.getEmail();
-        if(email == null ||!email.contains("@")){
+        if (email == null || !email.contains("@")) {
             throw new ValidationException("Invalid email. Email must contain '@'.");
         }
         if (patronRepository.existsByEmail(request.getEmail())) {
             throw new ValidationException("Email must be unique.");
         }
         String membershipType = request.getMembership_type();
-        if (!"regular".equals(membershipType) ||  !"premium".equals(membershipType)) {
+        if (!"regular".equals(membershipType) || !"premium".equals(membershipType)) {
             throw new ValidationException("Membership type must be either regular or premium.");
         }
+    }
+
+    @Override
+    public ResponseEntity<List<GetPatronTransactionHistoryResponseDto>> getTransactionHistory(Long id) {
+        List<TransactionEntity> transactions = transactionRepository.findByPatron_IdAndReturnDateIsNotNull(id);
+        List<GetPatronTransactionHistoryResponseDto> response = new ArrayList<>();
+        // Map from transaction entity to response dto
+        for (TransactionEntity transaction : transactions) {
+            GetPatronTransactionHistoryResponseDto dto = new GetPatronTransactionHistoryResponseDto();
+            dto.setBookTitle(transaction.getBook().getTitle());
+            dto.setBorrowDate(transaction.getBorrowDate());
+            dto.setReturneDate(transaction.getBorrowDate());
+            dto.setFine(transaction.getFine());
+            response.add(dto);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
