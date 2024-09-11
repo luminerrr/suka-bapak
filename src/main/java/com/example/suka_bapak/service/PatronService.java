@@ -1,6 +1,7 @@
 package com.example.suka_bapak.service;
 
 import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
+import com.example.suka_bapak.dto.response.patrons.GetOngoingBorrowResponseDto;
 import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
 import com.example.suka_bapak.dto.response.patrons.GetPatronTransactionHistoryResponseDto;
 import com.example.suka_bapak.entity.PatronEntity;
@@ -26,5 +27,7 @@ public interface PatronService {
     void deletePatron (Long id);
 
     ResponseEntity<List<GetPatronTransactionHistoryResponseDto>> getTransactionHistory(Long id);
+
+    ResponseEntity<List<GetOngoingBorrowResponseDto>> getOngoingBorrows(Long id);
 }
 

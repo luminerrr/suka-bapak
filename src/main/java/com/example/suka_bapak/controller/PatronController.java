@@ -1,6 +1,7 @@
 package com.example.suka_bapak.controller;
 
 import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
+import com.example.suka_bapak.dto.response.patrons.GetOngoingBorrowResponseDto;
 import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
 import com.example.suka_bapak.dto.response.patrons.GetPatronTransactionHistoryResponseDto;
 import com.example.suka_bapak.entity.PatronEntity;
@@ -89,6 +90,13 @@ public class PatronController {
         @PathVariable("patron_id") Long id
         ) {
         return patronService.getTransactionHistory(id);
+    }
+
+    @GetMapping("/{patron_id}/current_borrowings")
+    public ResponseEntity<List<GetOngoingBorrowResponseDto>> getOngoingTransactions(
+        @PathVariable("patron_id") Long id
+        ) {
+        return patronService.getOngoingBorrows(id);
     }
     
 }
