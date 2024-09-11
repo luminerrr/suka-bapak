@@ -13,9 +13,9 @@ import com.example.suka_bapak.dto.response.books.GetBooksDto;
 public interface BookService {
     ResponseEntity<Page<GetBooksDto>> getAllBooks(Pageable page);
 
-    BookEntity createBook(CreateBookRequest createBookRequest);
+    ResponseEntity<Object> createBook(CreateBookRequest createBookRequest);
 
-    BookEntity updateBook(Long id, CreateBookRequest createBookRequest);
+    ResponseEntity<Object> updateBook(Long id, CreateBookRequest createBookRequest);
 
     BookEntity getBookById(Long id);
 }

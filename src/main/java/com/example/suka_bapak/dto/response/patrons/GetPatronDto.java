@@ -9,11 +9,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-
+@NoArgsConstructor
+@Builder
+@Data
 public class GetPatronDto {
     @JsonProperty("id")
     private Long id;

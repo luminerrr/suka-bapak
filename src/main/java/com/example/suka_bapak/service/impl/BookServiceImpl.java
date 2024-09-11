@@ -18,6 +18,7 @@ import com.example.suka_bapak.service.BookService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -26,7 +27,6 @@ public class BookServiceImpl implements BookService {
 
     @Autowired
     private BookMapper bookMapper;
-
 
     @Override
     public ResponseEntity<Page<GetBooksDto>> getAllBooks(Pageable page) {
@@ -41,7 +41,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookEntity createBook(CreateBookRequest createBookRequest) {
+    public ResponseEntity<Object> createBook(CreateBookRequest createBookRequest) {
         validateBookRequest(createBookRequest);
 
         LocalDateTime timeNow = LocalDateTime.now();
@@ -55,11 +55,19 @@ public class BookServiceImpl implements BookService {
         book.setCreated_at(LocalDate.from(timeNow));
         book.setUpdated_at(LocalDate.from(timeNow));
 
-        return bookRepository.save(book);
+        BookEntity saved = bookRepository.save(book);
+        try {
+            return new ResponseEntity<>(Map.of(
+                    "id", saved.getId(),
+                    "title", saved.getTitle(),
+                    "available_copies", saved.getAvailable_copies()), HttpStatus.CREATED);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
-    public BookEntity updateBook(Long id, CreateBookRequest createBookRequest) {
+    public ResponseEntity<Object> updateBook(Long id, CreateBookRequest createBookRequest) {
         LocalDateTime timeNow = LocalDateTime.now();
         BookEntity existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
@@ -70,7 +78,14 @@ public class BookServiceImpl implements BookService {
         existingBook.setCreated_at(LocalDate.from(timeNow));
         existingBook.setUpdated_at(LocalDate.from(timeNow));
 
-        return bookRepository.save(existingBook);
+        try {
+            bookRepository.save(existingBook);
+            return new ResponseEntity<>(Map.of("message", "Book details updated successfully."), HttpStatus.OK);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(Map.of("error", "Book not found."), HttpStatus.NOT_FOUND);
+        }
     }
 
     private void validateBookRequest(CreateBookRequest request) {

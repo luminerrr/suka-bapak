@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class GetBooksDto {
     @JsonProperty("id")
     private Long id;
