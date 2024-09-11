@@ -90,7 +90,7 @@ public class PatronServiceImpl implements PatronService {
         PatronEntity existingPatron = patronRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patron not found."));
 
-        validatePatronLoan(id);
+//        validatePatronLoan(id);
 
         patronRepository.deleteById(id);
     }
@@ -107,16 +107,16 @@ public class PatronServiceImpl implements PatronService {
             throw new ValidationException("Email must be unique.");
         }
         String membershipType = request.getMembership_type();
-        if (!"regular".equals(membershipType) ||  !"premium".equals(membershipType)) {
+        if (membershipType == null || (!"regular".equals(membershipType) && !"premium".equals(membershipType))) {
             throw new ValidationException("Membership type must be either regular or premium.");
         }
     }
 
-    private void validatePatronLoan(Long id) {
-        List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndPatron_IdReturnDateIsNull(id);
-        if (!hasActiveLoans.isEmpty()) {
-            throw new ValidationException("Cannot delete patron with active loans.");
-        }
-    }
+//    private void validatePatronLoan(Long id) {
+//        List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndPatron_IdReturnDateIsNull(id);
+//        if (!hasActiveLoans.isEmpty()) {
+//            throw new ValidationException("Cannot delete patron with active loans.");
+//        }
+//    }
 
 }
