@@ -86,13 +86,20 @@ public class PatronServiceImpl implements PatronService {
     }
 
     @Override
-    public void deletePatron(Long id) {
-        PatronEntity existingPatron = patronRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Patron not found."));
+    public ResponseEntity<Object> deletePatron(Long id) {
+        if (!patronRepository.existsById(id)) {
+            return new ResponseEntity<>(Map.of("error", "Patron not found."), HttpStatus.NOT_FOUND);
+        }
 
-//        validatePatronLoan(id);
-
-        patronRepository.deleteById(id);
+        try {
+            validatePatronLoan(id);
+            patronRepository.deleteById(id);
+            return new ResponseEntity<>(Map.of("message", "Patron deleted successfully."), HttpStatus.OK);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(Map.of("error", "An error occurred while deleting the patron."), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private void validatePatronRequest(CreatePatronRequest request) {
@@ -114,18 +121,11 @@ public class PatronServiceImpl implements PatronService {
 
 
    private void validatePatronLoan(Long id) {
-       List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndPatron_IdReturnDateIsNull(id);
+       List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndReturnDateIsNull(id);
        if (!hasActiveLoans.isEmpty()) {
            throw new ValidationException("Cannot delete patron with active loans.");
        }
    }
-
-    private void validatePatronLoan(Long id) {
-        List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndReturnDateIsNull(id);
-        if (!hasActiveLoans.isEmpty()) {
-            throw new ValidationException("Cannot delete patron with active loans.");
-        }
-    }
 
 
 
