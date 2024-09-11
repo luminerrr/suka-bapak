@@ -1,4 +1,4 @@
-package entity;
+package com.example.suka_bapak.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
