@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.suka_bapak.dto.response.books.GetBooksDto;
+import com.example.suka_bapak.dto.response.books.GetOverdueBooksResponseDto;
 import com.example.suka_bapak.service.BookService;
 
 import java.util.HashMap;
@@ -88,4 +89,10 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", "Book not found."));
         }
     }
+
+    @GetMapping("/overdue")
+    public ResponseEntity<List<GetOverdueBooksResponseDto>> getOverdueBooks() {
+        return bookService.getOverdueBooks();
+    }
+
 }
