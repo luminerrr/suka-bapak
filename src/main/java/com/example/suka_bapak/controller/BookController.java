@@ -49,17 +49,10 @@ public class BookController {
     }
 
     @PutMapping("/{book_id}")
-    public ResponseEntity<?> updateBook(
+    public ResponseEntity<Object> updateBook(
             @PathVariable("book_id") Long bookId,
             @RequestBody CreateBookRequest createBookRequest) {
-        try {
-            bookService.updateBook(bookId, createBookRequest);
-            return new ResponseEntity<>(Map.of("message", "Book details updated successfully."), HttpStatus.OK);
-        } catch (ValidationException e) {
-            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(Map.of("error", "Book not found."), HttpStatus.NOT_FOUND);
-        }
+                return bookService.updateBook(bookId, createBookRequest);
     }
 
         @Autowired

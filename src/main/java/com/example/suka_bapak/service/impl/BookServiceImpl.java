@@ -67,7 +67,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookEntity updateBook(Long id, CreateBookRequest createBookRequest) {
+    public ResponseEntity<Object> updateBook(Long id, CreateBookRequest createBookRequest) {
         LocalDateTime timeNow = LocalDateTime.now();
         BookEntity existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
@@ -78,7 +78,14 @@ public class BookServiceImpl implements BookService {
         existingBook.setCreated_at(LocalDate.from(timeNow));
         existingBook.setUpdated_at(LocalDate.from(timeNow));
 
-        return bookRepository.save(existingBook);
+        try {
+            bookRepository.save(existingBook);
+            return new ResponseEntity<>(Map.of("message", "Book details updated successfully."), HttpStatus.OK);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(Map.of("error", "Book not found."), HttpStatus.NOT_FOUND);
+        }
     }
 
     private void validateBookRequest(CreateBookRequest request) {

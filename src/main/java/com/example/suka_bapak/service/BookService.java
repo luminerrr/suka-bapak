@@ -15,7 +15,7 @@ public interface BookService {
 
     ResponseEntity<Object> createBook(CreateBookRequest createBookRequest);
 
-    BookEntity updateBook(Long id, CreateBookRequest createBookRequest);
+    ResponseEntity<Object> updateBook(Long id, CreateBookRequest createBookRequest);
 
     BookEntity getBookById(Long id);
 }
