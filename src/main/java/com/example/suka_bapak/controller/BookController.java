@@ -47,10 +47,6 @@ public class BookController {
         
         return bookService.createBook(createBookRequest);
     }
-//    public ResponseEntity<BookEntity> createBook(@RequestBody CreateBookRequest book) {
-//        BookEntity savedBook = bookService.createBook(book);
-//        return ResponseEntity.ok(savedBook);
-//    }
 
     @PutMapping("/{book_id}")
     public ResponseEntity<?> updateBook(
