@@ -16,6 +16,7 @@ import com.example.suka_bapak.service.BookService;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,7 @@ public class BookController {
 
     @PostMapping
     public ResponseEntity<Object> addBook(@RequestBody CreateBookRequest createBookRequest) {
-        
+
         return bookService.createBook(createBookRequest);
     }
 
@@ -61,8 +62,7 @@ public class BookController {
         @GetMapping("/search")
         public ResponseEntity<?> searchBooks(
                 @RequestParam(required = false) String title,
-                @RequestParam(required = false) String author)
-        {
+                @RequestParam(required = false) String author) {
             if (title == null && author == null) {
                 return ResponseEntity.badRequest().body("Please provide either title or author for search.");
             }
@@ -77,8 +77,18 @@ public class BookController {
                 result.put("available_copies", book.getAvailable_copies());
                 return result;
             }).collect(Collectors.toList());
-
             return ResponseEntity.ok(response);
         }
+
+    @DeleteMapping("/{bookId}")
+    public ResponseEntity<?> deleteBook(@PathVariable Long bookId) {
+        try {
+            bookService.deleteBook(bookId);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Book deleted successfully."));
+        } catch (ValidationException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("error", e.getMessage()));
+        }
     }
+
+}
 

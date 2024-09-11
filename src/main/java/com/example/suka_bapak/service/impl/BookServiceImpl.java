@@ -2,6 +2,8 @@ package com.example.suka_bapak.service.impl;
 
 import com.example.suka_bapak.dto.request.books.CreateBookRequest;
 import com.example.suka_bapak.exception.ValidationException;
+import com.example.suka_bapak.repository.TransactionRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.Page;
@@ -16,6 +18,7 @@ import com.example.suka_bapak.mapper.BookMapper;
 import com.example.suka_bapak.repository.BookRepository;
 import com.example.suka_bapak.service.BookService;
 
+import java.awt.print.Book;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -27,6 +30,9 @@ public class BookServiceImpl implements BookService {
 
     @Autowired
     private BookMapper bookMapper;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Override
     public ResponseEntity<Page<GetBooksDto>> getAllBooks(Pageable page) {
@@ -101,4 +107,17 @@ public class BookServiceImpl implements BookService {
             throw new ValidationException("Quantity must be a positive integer.");
         }
     }
+
+    public void deleteBook(Long bookId) throws ValidationException {
+        BookEntity book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found with id: " + bookId));
+
+        boolean hasActiveLoans = transactionRepository.existsByBookIdAndReturnDateIsNull(bookId);
+        if (hasActiveLoans) {
+            throw new ValidationException("Cannot delete book with active loans.");
+        }
+
+        bookRepository.delete(book);
+    }
+
 }
