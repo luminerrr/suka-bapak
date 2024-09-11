@@ -1,5 +1,7 @@
 package com.example.suka_bapak.service;
 
+import com.example.suka_bapak.dto.request.CreateBookRequest;
+import com.example.suka_bapak.entity.BookEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -10,4 +12,13 @@ import com.example.suka_bapak.dto.response.books.GetBooksDto;
 @Component
 public interface BookService {
     ResponseEntity<Page<GetBooksDto>> getAllBooks(Pageable page);
+
+    BookEntity createBook(CreateBookRequest createBookRequest);
+
+    BookEntity updateBook(Long id, CreateBookRequest createBookRequest);
+
 }
+
+
+
+
