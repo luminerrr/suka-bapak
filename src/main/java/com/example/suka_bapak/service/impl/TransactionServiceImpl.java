@@ -52,19 +52,18 @@ public class TransactionServiceImpl implements TransactionService {
         if (book.getAvailable_copies() <= 0) {
             throw new ValidationException("Book is not available");
         }
+        // Reduce book available_copies
+        book.setAvailable_copies(book.getAvailable_copies() - 1);
+        bookRepository.save(book);
         TransactionEntity transaction = new TransactionEntity();
         transaction.setPatron(patron);
         transaction.setBook(book);
-
         LocalDate today = LocalDate.now();
         transaction.setBorrowDate(today);
-
         LocalDate dueDate = today.plusDays(7);
         transaction.setDueDate(dueDate);
-
         transaction.setReturnDate(null);
         transaction.setFine(0D);
-
         transactionRepository.save(transaction);
         CreateTransactionsResponseDto res = new CreateTransactionsResponseDto();
         res.setMessage("Book borrowed successfully");
@@ -88,7 +87,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (borrowedBooks.isEmpty()) {
             throw new ValidationException("Book is not borrowed by this patron");
         }
-        // Change returned_date and calculate total fine
+        // Change returned_date, calculate total fine, and add book available_copies when returned
         Double totalFine = 0D;
         for (TransactionEntity transaction : borrowedBooks) {
             transaction.setReturnDate(LocalDate.now());
@@ -98,6 +97,11 @@ public class TransactionServiceImpl implements TransactionService {
             transaction.setFine(transactionFine);
             totalFine += transactionFine;
             transactionRepository.save(transaction);
+
+            // Add book available_copies
+            Optional<BookEntity> transactionBookOpt = bookRepository.findById(transaction.getBook().getId());
+            BookEntity transactionBook = transactionBookOpt.get();
+            transactionBook.setAvailable_copies(transactionBook.getAvailable_copies() + 1);
         }
 
         ReturnTransactionsResponse res = new ReturnTransactionsResponse();
