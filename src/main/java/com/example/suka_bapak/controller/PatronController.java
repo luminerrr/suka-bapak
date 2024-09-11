@@ -30,15 +30,16 @@ public class PatronController {
     //    Get patron by a certain id
     @GetMapping("/{patron_id}")
     public ResponseEntity<PatronEntity> getPatronById(
-            @PathVariable Long id
+            @PathVariable Long patron_id
     ){
-        PatronEntity patron = patronService.getPatronById(id);
+        PatronEntity patron = patronService.getPatronById(patron_id);
         if (patron != null) {
             return ResponseEntity.ok(patron);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
 
 //    Create new patron
     @PostMapping

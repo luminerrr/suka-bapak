@@ -61,6 +61,14 @@ public class PatronServiceImpl implements PatronService {
         return patronRepository.save(existingPatron);
     }
 
+    @Override
+    public void deletePatron(Long id, CreatePatronRequest createPatronRequest) {
+        PatronEntity existingPatron = patronRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patron not found."));
+
+        patronRepository.deleteById(id);
+    }
+
     private void validatePatronRequest(CreatePatronRequest request) {
         if (request.getName() == null || request.getName().trim().isEmpty())
         {
@@ -73,4 +81,5 @@ public class PatronServiceImpl implements PatronService {
             throw new ValidationException("Membership type must be either regular or premium.");
         }
     }
+
 }

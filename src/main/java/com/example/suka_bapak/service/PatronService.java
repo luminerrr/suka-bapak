@@ -20,5 +20,6 @@ public interface PatronService {
 
     PatronEntity updatePatron (Long id, CreatePatronRequest createPatronRequest);
 
+    void deletePatron (Long id, CreatePatronRequest createPatronRequest);
 }
 

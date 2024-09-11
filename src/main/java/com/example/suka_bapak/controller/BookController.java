@@ -37,7 +37,6 @@ public class BookController {
         }
     }
 
-
     @PostMapping
     public ResponseEntity<?> addBook(@RequestBody CreateBookRequest createBookRequest) {
         try {
@@ -51,10 +50,6 @@ public class BookController {
             return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
-//    public ResponseEntity<BookEntity> createBook(@RequestBody CreateBookRequest book) {
-//        BookEntity savedBook = bookService.createBook(book);
-//        return ResponseEntity.ok(savedBook);
-//    }
 
     @PutMapping("/{book_id}")
     public ResponseEntity<?> updateBook(
