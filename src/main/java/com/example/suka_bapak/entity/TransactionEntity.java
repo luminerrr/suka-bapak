@@ -18,12 +18,12 @@ public class TransactionEntity implements Serializable {
     private Long id;
 
     // patron id
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "patron_id", referencedColumnName = "id")
     private PatronEntity patron;
 
     // book_id
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "book_id", referencedColumnName = "id")
     private BookEntity book;
 

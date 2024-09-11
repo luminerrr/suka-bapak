@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
@@ -37,4 +39,8 @@ public class PatronEntity {
     @Column(name = "updated_at", nullable = false)
     @JsonProperty("updated_at")
     private LocalDate updated_at;
+
+    @OneToMany(mappedBy = "patron", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TransactionEntity> transactions = new ArrayList<>();
+
 }
