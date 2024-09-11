@@ -7,6 +7,7 @@ import com.example.suka_bapak.dto.request.transactions.CreateTransactionsRequest
 
 @Component
 public interface TransactionService {
-    ResponseEntity<Object>  createTransaction(CreateTransactionsRequestDto request);
+    ResponseEntity<Object> createTransaction(CreateTransactionsRequestDto request);
+    ResponseEntity<Object> returnTransaction(CreateTransactionsRequestDto request);
 
 }
