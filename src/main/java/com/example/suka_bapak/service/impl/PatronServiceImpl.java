@@ -1,6 +1,7 @@
 package com.example.suka_bapak.service.impl;
 
 import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
+import com.example.suka_bapak.dto.response.patrons.GetOngoingBorrowResponseDto;
 import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
 import com.example.suka_bapak.dto.response.patrons.GetPatronTransactionHistoryResponseDto;
 import com.example.suka_bapak.entity.PatronEntity;
@@ -133,6 +134,22 @@ public class PatronServiceImpl implements PatronService {
             dto.setBorrowDate(transaction.getBorrowDate());
             dto.setReturneDate(transaction.getBorrowDate());
             dto.setFine(transaction.getFine());
+            response.add(dto);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<GetOngoingBorrowResponseDto>> getOngoingBorrows(Long id) {
+        List<TransactionEntity> transactions = transactionRepository.findByPatron_IdAndReturnDateIsNull(id);
+        List<GetOngoingBorrowResponseDto> response = new ArrayList<>();
+        // Map TransactionEntity to ResponseDto
+        for (TransactionEntity transaction : transactions) {
+            GetOngoingBorrowResponseDto dto = new GetOngoingBorrowResponseDto();
+            dto.setBookTitle(transaction.getBook().getTitle());
+            dto.setBorrowDate(transaction.getBorrowDate());
+            dto.setDueDate(transaction.getDueDate());
             response.add(dto);
         }
 
