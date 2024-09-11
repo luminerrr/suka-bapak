@@ -70,15 +70,29 @@ public class PatronServiceImpl implements PatronService {
         }
     }
 
+    @Override
+    public void deletePatron(Long id, CreatePatronRequest createPatronRequest) {
+        PatronEntity existingPatron = patronRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patron not found."));
+
+        patronRepository.deleteById(id);
+    }
+
     private void validatePatronRequest(CreatePatronRequest request) {
         if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new ValidationException("Invalid email or missing required fields.");
         }
+        String email = request.getEmail();
+        if(email == null ||!email.contains("@")){
+            throw new ValidationException("Invalid email. Email must contain '@'.");
+        }
         if (patronRepository.existsByEmail(request.getEmail())) {
             throw new ValidationException("Email must be unique.");
         }
-        if (request.getMembership_type() != "regular" || request.getMembership_type() != "premium") {
+        String membershipType = request.getMembership_type();
+        if (!"regular".equals(membershipType) ||  !"premium".equals(membershipType)) {
             throw new ValidationException("Membership type must be either regular or premium.");
         }
     }
+
 }

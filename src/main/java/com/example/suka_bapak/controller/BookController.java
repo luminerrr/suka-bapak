@@ -41,7 +41,6 @@ public class BookController {
         }
     }
 
-
     @PostMapping
     public ResponseEntity<Object> addBook(@RequestBody CreateBookRequest createBookRequest) {
         
