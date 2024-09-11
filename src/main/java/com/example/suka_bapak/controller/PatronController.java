@@ -71,7 +71,7 @@ public class PatronController {
             @PathVariable("patron_id") Long id,
             @RequestBody CreatePatronRequest createPatronRequest) {
         try {
-            patronService.deletePatron(id, createPatronRequest);
+            patronService.deletePatron(id);
             return new ResponseEntity<>(Map.of("message", "Patron deleted successfully."), HttpStatus.OK);
         } catch (ValidationException e) {
             return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
