@@ -93,9 +93,11 @@ public class TransactionServiceImpl implements TransactionService {
         for (TransactionEntity transaction : borrowedBooks) {
             transaction.setReturnDate(LocalDate.now());
             Long daysOverdue = ChronoUnit.DAYS.between(transaction.getDueDate(), LocalDate.now());
+            daysOverdue = daysOverdue > 0 ? daysOverdue : 0;
             Double transactionFine = daysOverdue * GeneralConstant.FINE_FEE_PER_DAY;
             transaction.setFine(transactionFine);
             totalFine += transactionFine;
+            transactionRepository.save(transaction);
         }
 
         ReturnTransactionsResponse res = new ReturnTransactionsResponse();
