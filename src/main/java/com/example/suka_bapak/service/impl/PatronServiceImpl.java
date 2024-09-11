@@ -113,10 +113,12 @@ public class PatronServiceImpl implements PatronService {
     }
 
     private void validatePatronLoan(Long id) {
-        List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndPatron_IdReturnDateIsNull(id);
+        List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndReturnDateIsNull(id);
         if (!hasActiveLoans.isEmpty()) {
             throw new ValidationException("Cannot delete patron with active loans.");
         }
     }
+
+
 
 }
