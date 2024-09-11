@@ -1,5 +1,6 @@
 package com.example.suka_bapak.service.impl;
 
+import com.example.suka_bapak.constant.GeneralConstant;
 import com.example.suka_bapak.dto.request.books.CreateBookRequest;
 import com.example.suka_bapak.exception.ValidationException;
 import com.example.suka_bapak.repository.TransactionRepository;
@@ -13,14 +14,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.suka_bapak.dto.response.books.GetBooksDto;
+import com.example.suka_bapak.dto.response.books.GetOverdueBooksResponseDto;
 import com.example.suka_bapak.entity.BookEntity;
+import com.example.suka_bapak.entity.TransactionEntity;
 import com.example.suka_bapak.mapper.BookMapper;
 import com.example.suka_bapak.repository.BookRepository;
+import com.example.suka_bapak.repository.PatronRepository;
 import com.example.suka_bapak.service.BookService;
 
-import java.awt.print.Book;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,6 +119,28 @@ public class BookServiceImpl implements BookService {
         }
 
         bookRepository.delete(book);
+    }
+
+    @Override
+    public ResponseEntity<List<GetOverdueBooksResponseDto>> getOverdueBooks() {
+        LocalDate today = LocalDate.now();
+        List<TransactionEntity> overdueTransactions = transactionRepository.findByDueDateBefore(today);
+        List<GetOverdueBooksResponseDto> response = new ArrayList<>();
+        // Map from entity to dto and count overdue days & fees
+        for (TransactionEntity transaction : overdueTransactions) {
+            GetOverdueBooksResponseDto dto = new GetOverdueBooksResponseDto();
+            dto.setBookTitle(transaction.getBook().getTitle());
+            dto.setPatronName(transaction.getPatron().getName());
+            dto.setDueDate(transaction.getDueDate());
+            Long overdue = ChronoUnit.DAYS.between(transaction.getDueDate(), LocalDate.now());
+            overdue = overdue > 0 ? overdue : 0;
+            dto.setDaysOverdue(overdue.intValue());
+            Double fine = overdue * GeneralConstant.FINE_FEE_PER_DAY;
+            dto.setFine(fine);
+            response.add(dto);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     public ResponseEntity<Object> checkBookAvailability(Long book_id) {
