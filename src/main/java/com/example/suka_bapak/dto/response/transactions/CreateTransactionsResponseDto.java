@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class CreateTransactionsResponseDto {
     @JsonProperty("message")
     private String message;

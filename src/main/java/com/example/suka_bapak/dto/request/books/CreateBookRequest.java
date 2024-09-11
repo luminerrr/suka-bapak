@@ -11,7 +11,6 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class CreateBookRequest {
     @JsonProperty("title")
     private String title;

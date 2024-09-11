@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class CreateTransactionsRequestDto {
     @JsonProperty("patron_id")
     private Long patronId;
