@@ -45,5 +45,5 @@ public class TransactionEntity implements Serializable {
     // fine
     @Column(name = "fine")
     @JsonProperty("fine")
-    private Float fine;
+    private Double fine;
 }
