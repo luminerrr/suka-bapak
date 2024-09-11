@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-
 @Component
 public interface PatronService {
 
@@ -16,10 +15,11 @@ public interface PatronService {
 
     PatronEntity getPatronById (Long id);
 
-    PatronEntity createPatron (CreatePatronRequest createPatronRequest);
+    ResponseEntity<Object> createPatron (CreatePatronRequest createPatronRequest);
 
     ResponseEntity<Object> updatePatron (Long id, CreatePatronRequest createPatronRequest);
 
-    void deletePatron (Long id, CreatePatronRequest createPatronRequest);
+    void deletePatron (Long id);
+
 }
 

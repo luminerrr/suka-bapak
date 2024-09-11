@@ -3,12 +3,15 @@ package com.example.suka_bapak.service.impl;
 import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
 import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
 import com.example.suka_bapak.entity.PatronEntity;
+import com.example.suka_bapak.entity.TransactionEntity;
 import com.example.suka_bapak.exception.ValidationException;
 import com.example.suka_bapak.mapper.PatronMapper;
 import com.example.suka_bapak.repository.PatronRepository;
+import com.example.suka_bapak.repository.TransactionRepository;
 import com.example.suka_bapak.service.PatronService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,9 @@ public class PatronServiceImpl implements PatronService {
 
     @Autowired
     private PatronRepository patronRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Autowired
     private PatronMapper patronMapper;
@@ -42,7 +48,7 @@ public class PatronServiceImpl implements PatronService {
     }
 
     @Override
-    public PatronEntity createPatron(CreatePatronRequest createPatronRequest) {
+    public ResponseEntity<Object> createPatron(CreatePatronRequest createPatronRequest) {
         validatePatronRequest(createPatronRequest);
 
         PatronEntity patron = new PatronEntity();
@@ -50,7 +56,16 @@ public class PatronServiceImpl implements PatronService {
         patron.setEmail(createPatronRequest.getEmail());
         patron.setMembership_type(createPatronRequest.getMembership_type());
 
-        return patronRepository.save(patron);
+        PatronEntity saved = patronRepository.save(patron);
+        try {
+            return new ResponseEntity<>(Map.of(
+                    "id", saved.getId(),
+                    "name", saved.getName(),
+                    "email", saved.getEmail(),
+                    "membership_type", saved.getMembership_type()), HttpStatus.CREATED);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
@@ -71,9 +86,11 @@ public class PatronServiceImpl implements PatronService {
     }
 
     @Override
-    public void deletePatron(Long id, CreatePatronRequest createPatronRequest) {
+    public void deletePatron(Long id) {
         PatronEntity existingPatron = patronRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patron not found."));
+
+        validatePatronLoan(id);
 
         patronRepository.deleteById(id);
     }
@@ -92,6 +109,13 @@ public class PatronServiceImpl implements PatronService {
         String membershipType = request.getMembership_type();
         if (!"regular".equals(membershipType) ||  !"premium".equals(membershipType)) {
             throw new ValidationException("Membership type must be either regular or premium.");
+        }
+    }
+
+    private void validatePatronLoan(Long id) {
+        List<TransactionEntity> hasActiveLoans = transactionRepository.findByPatron_IdAndPatron_IdReturnDateIsNull(id);
+        if (!hasActiveLoans.isEmpty()) {
+            throw new ValidationException("Cannot delete patron with active loans.");
         }
     }
 

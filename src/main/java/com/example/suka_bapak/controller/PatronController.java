@@ -21,17 +21,18 @@ public class PatronController {
     @Autowired
     private PatronService patronService;
 
-    // Get all patrons
+//    Get all patrons
     @GetMapping
     public ResponseEntity<Page<GetPatronDto>> getAllPatrons(Pageable page) {
         return patronService.getAllPatrons(page);
     }
 
-    // Get patron by a certain id
+    //    Get patron by a certain id
     @GetMapping("/{patron_id}")
     public ResponseEntity<PatronEntity> getPatronById(
-            @PathVariable Long id) {
-        PatronEntity patron = patronService.getPatronById(id);
+            @PathVariable Long patron_id
+    ){
+        PatronEntity patron = patronService.getPatronById(patron_id);
         if (patron != null) {
             return ResponseEntity.ok(patron);
         } else {
@@ -39,20 +40,28 @@ public class PatronController {
         }
     }
 
-    // Create new patron
+
+//    Create new patron
     @PostMapping
-    public ResponseEntity<PatronEntity> createPatron(
-            @RequestBody CreatePatronRequest patron) {
-        PatronEntity savedPatron = patronService.createPatron(patron);
-        return ResponseEntity.ok(savedPatron);
+    public ResponseEntity<Object> addPatron(
+            @RequestBody CreatePatronRequest createPatronRequest
+    ){
+        return patronService.createPatron(createPatronRequest);
     }
 
-    // Update patron
+//    Update patron
     @PutMapping("/{patron_id}")
-    public ResponseEntity<Object> updatePatron(
-            @PathVariable("patron_id") Long id,
+    public ResponseEntity<?> updatePatron(
+            @PathVariable ("patron_id") Long id,
             @RequestBody CreatePatronRequest createPatronRequest) {
-        return patronService.updatePatron(id, createPatronRequest);
+        try {
+            patronService.updatePatron(id, createPatronRequest);
+            return new ResponseEntity<>(Map.of("message", "Patron details updated successfully."), HttpStatus.OK);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(Map.of("error", "Patron not found."), HttpStatus.NOT_FOUND);
+        }
     }
 
 
@@ -62,7 +71,7 @@ public class PatronController {
             @PathVariable("patron_id") Long id,
             @RequestBody CreatePatronRequest createPatronRequest) {
         try {
-            patronService.deletePatron(id, createPatronRequest);
+            patronService.deletePatron(id);
             return new ResponseEntity<>(Map.of("message", "Patron deleted successfully."), HttpStatus.OK);
         } catch (ValidationException e) {
             return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
