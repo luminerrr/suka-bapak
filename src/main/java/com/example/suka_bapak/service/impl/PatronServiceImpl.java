@@ -42,7 +42,7 @@ public class PatronServiceImpl implements PatronService {
     }
 
     @Override
-    public PatronEntity createPatron(CreatePatronRequest createPatronRequest) {
+    public ResponseEntity<Object> createPatron(CreatePatronRequest createPatronRequest) {
         validatePatronRequest(createPatronRequest);
 
         PatronEntity patron = new PatronEntity();
@@ -50,7 +50,16 @@ public class PatronServiceImpl implements PatronService {
         patron.setEmail(createPatronRequest.getEmail());
         patron.setMembership_type(createPatronRequest.getMembership_type());
 
-        return patronRepository.save(patron);
+        PatronEntity saved = patronRepository.save(patron);
+        try {
+            return new ResponseEntity<>(Map.of(
+                    "id", saved.getId(),
+                    "name", saved.getName(),
+                    "email", saved.getEmail(),
+                    "membership_type", saved.getMembership_type()), HttpStatus.CREATED);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
