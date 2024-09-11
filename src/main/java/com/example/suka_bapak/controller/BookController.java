@@ -88,4 +88,9 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", "Book not found."));
         }
     }
+
+    @GetMapping("/{book_id}/availability")
+    public ResponseEntity<Object> checkBookAvailability(@PathVariable Long book_id) {
+        return bookService.checkBookAvailability(book_id);
+    }
 }
