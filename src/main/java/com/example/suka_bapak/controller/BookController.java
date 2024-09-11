@@ -1,19 +1,19 @@
 package com.example.suka_bapak.controller;
 
+import com.example.suka_bapak.dto.request.CreateBookRequest;
+import com.example.suka_bapak.entity.BookEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.suka_bapak.dto.response.books.GetBooksDto;
 import com.example.suka_bapak.service.BookService;
-import org.springframework.web.bind.annotation.GetMapping;
 
 
 @RestController
-@RequestMapping
+@RequestMapping("/api/books")
 public class BookController {
     @Autowired
     private BookService bookService;
@@ -22,5 +22,13 @@ public class BookController {
     public ResponseEntity<Page<GetBooksDto>> getAllBooks(Pageable page) {
         return bookService.getAllBooks(page);
     }
-    
+
+    @PostMapping
+    public ResponseEntity<BookEntity> createBook(@RequestBody CreateBookRequest book){
+        BookEntity savedBook = bookService.createBook(book);
+        return ResponseEntity.ok(savedBook);
+    }
+
+
+
 }
