@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
     List<TransactionEntity> findByBook_IdAndPatron_IdAndReturnDateIsNull(Long bookId, Long patronId);
+    boolean existsByBookIdAndReturnDateIsNull(Long bookId);
 }
