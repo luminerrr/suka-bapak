@@ -36,5 +36,5 @@ public class PatronEntity {
 
     @Column(name = "updated_at", nullable = false)
     @JsonProperty("updated_at")
-    private LocalDate updated_ad;
+    private LocalDate updated_at;
 }

@@ -1,48 +1,35 @@
-package com.example.suka_bapak.entity;
-
+package com.example.suka_bapak.dto.request.books;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
-@Entity
-@Setter
+@Data
+@Builder
 @Getter
-@Table(name = "books")
-
-public class BookEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateBookRequest {
     @JsonProperty("title")
     private String title;
 
-    @Column(nullable = false)
     @JsonProperty("author")
     private String author;
 
-    @Column(nullable = false)
     @JsonProperty("isbn")
     private String isbn;
 
-    @Column(nullable = false)
     @JsonProperty("quantity")
     private int quantity;
 
-    @Column(nullable = false)
     @JsonProperty("available_copies")
     private int available_copies;
 
-    @Column(nullable = true)
     @JsonProperty("created_at")
     private LocalDate created_at;
 
-    @Column(nullable = true)
     @JsonProperty("updated_at")
     private LocalDate updated_at;
 }
