@@ -39,17 +39,9 @@ public class BookController {
 
 
     @PostMapping
-    public ResponseEntity<?> addBook(@RequestBody CreateBookRequest createBookRequest) {
-        try {
-            BookEntity newBook = bookService.createBook(createBookRequest);
-            return new ResponseEntity<>(Map.of(
-                    "id", newBook.getId(),
-                    "title", newBook.getTitle(),
-                    "available_copies", newBook.getAvailable_copies()
-            ), HttpStatus.CREATED);
-        } catch (ValidationException e) {
-            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<Object> addBook(@RequestBody CreateBookRequest createBookRequest) {
+        
+        return bookService.createBook(createBookRequest);
     }
 //    public ResponseEntity<BookEntity> createBook(@RequestBody CreateBookRequest book) {
 //        BookEntity savedBook = bookService.createBook(book);
