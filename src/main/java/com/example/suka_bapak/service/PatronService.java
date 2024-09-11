@@ -1,7 +1,10 @@
 package com.example.suka_bapak.service;
 
+import com.example.suka_bapak.dto.request.books.CreateBookRequest;
 import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
+import com.example.suka_bapak.dto.response.books.GetBooksDto;
 import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
+import com.example.suka_bapak.entity.BookEntity;
 import com.example.suka_bapak.entity.PatronEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +19,12 @@ public interface PatronService {
 
     PatronEntity getPatronById (Long id);
 
-    PatronEntity createPatron (CreatePatronRequest createPatronRequest);
+    ResponseEntity<Object> createPatron (CreatePatronRequest createPatronRequest);
 
     ResponseEntity<Object> updatePatron (Long id, CreatePatronRequest createPatronRequest);
 
     void deletePatron (Long id, CreatePatronRequest createPatronRequest);
+
+    BookEntity getBookById(Long id);
 }
 
