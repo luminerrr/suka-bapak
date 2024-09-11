@@ -8,6 +8,9 @@ import com.example.suka_bapak.mapper.PatronMapper;
 import com.example.suka_bapak.repository.PatronRepository;
 import com.example.suka_bapak.service.PatronService;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,19 +54,24 @@ public class PatronServiceImpl implements PatronService {
     }
 
     @Override
-    public PatronEntity updatePatron(Long id, CreatePatronRequest createPatronRequest) {
+    public ResponseEntity<Object> updatePatron(Long id, CreatePatronRequest createPatronRequest) {
         PatronEntity existingPatron = patronRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patron not found."));
         existingPatron.setName(createPatronRequest.getName());
         existingPatron.setEmail(createPatronRequest.getEmail());
         existingPatron.setMembership_type(createPatronRequest.getMembership_type());
-
-        return patronRepository.save(existingPatron);
+        try {
+            patronRepository.save(existingPatron);
+            return new ResponseEntity<>(Map.of("message", "Patron details updated successfully."), HttpStatus.OK);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(Map.of("error", "Patron not found."), HttpStatus.NOT_FOUND);
+        }
     }
 
     private void validatePatronRequest(CreatePatronRequest request) {
-        if (request.getName() == null || request.getName().trim().isEmpty())
-        {
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new ValidationException("Invalid email or missing required fields.");
         }
         if (patronRepository.existsByEmail(request.getEmail())) {

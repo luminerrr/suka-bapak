@@ -21,17 +21,16 @@ public class PatronController {
     @Autowired
     private PatronService patronService;
 
-//    Get all patrons
+    // Get all patrons
     @GetMapping
     public ResponseEntity<Page<GetPatronDto>> getAllPatrons(Pageable page) {
         return patronService.getAllPatrons(page);
     }
 
-    //    Get patron by a certain id
+    // Get patron by a certain id
     @GetMapping("/{patron_id}")
     public ResponseEntity<PatronEntity> getPatronById(
-            @PathVariable Long id
-    ){
+            @PathVariable Long id) {
         PatronEntity patron = patronService.getPatronById(id);
         if (patron != null) {
             return ResponseEntity.ok(patron);
@@ -40,28 +39,20 @@ public class PatronController {
         }
     }
 
-//    Create new patron
+    // Create new patron
     @PostMapping
     public ResponseEntity<PatronEntity> createPatron(
-            @RequestBody CreatePatronRequest patron
-    ){
+            @RequestBody CreatePatronRequest patron) {
         PatronEntity savedPatron = patronService.createPatron(patron);
         return ResponseEntity.ok(savedPatron);
     }
 
-//    Update patron
+    // Update patron
     @PutMapping("/{patron_id}")
-    public ResponseEntity<?> updatePatron(
-            @PathVariable ("patron_id") Long id,
+    public ResponseEntity<Object> updatePatron(
+            @PathVariable("patron_id") Long id,
             @RequestBody CreatePatronRequest createPatronRequest) {
-        try {
-            patronService.updatePatron(id, createPatronRequest);
-            return new ResponseEntity<>(Map.of("message", "Patron details updated successfully."), HttpStatus.OK);
-        } catch (ValidationException e) {
-            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(Map.of("error", "Patron not found."), HttpStatus.NOT_FOUND);
-        }
+        return patronService.updatePatron(id, createPatronRequest);
     }
 
 }
