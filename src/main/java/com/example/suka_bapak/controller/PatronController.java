@@ -68,8 +68,8 @@ public class PatronController {
 //    Delete patron
     @DeleteMapping("/{patron_id}")
     public ResponseEntity<?> deletePatron(
-            @PathVariable("patron_id") Long id,
-            @RequestBody CreatePatronRequest createPatronRequest) {
+            @PathVariable("patron_id") Long id
+            ) {
         try {
             patronService.deletePatron(id);
             return new ResponseEntity<>(Map.of("message", "Patron deleted successfully."), HttpStatus.OK);
