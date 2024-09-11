@@ -2,6 +2,7 @@ package com.example.suka_bapak.controller;
 
 import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
 import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
+import com.example.suka_bapak.dto.response.patrons.GetPatronTransactionHistoryResponseDto;
 import com.example.suka_bapak.entity.PatronEntity;
 import com.example.suka_bapak.exception.ValidationException;
 import com.example.suka_bapak.service.PatronService;
@@ -12,7 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 @RestController
 @RequestMapping("/api/patrons")
@@ -79,4 +83,12 @@ public class PatronController {
             return new ResponseEntity<>(Map.of("error", "Patron not found."), HttpStatus.NOT_FOUND);
         }
     }
+
+    @GetMapping("/{patron_id}/borrow_history")
+    public ResponseEntity<List<GetPatronTransactionHistoryResponseDto>> getTransactionHistory(
+        @PathVariable("patron_id") Long id
+        ) {
+        return patronService.getTransactionHistory(id);
+    }
+    
 }

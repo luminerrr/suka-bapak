@@ -2,7 +2,11 @@ package com.example.suka_bapak.service;
 
 import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
 import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
+import com.example.suka_bapak.dto.response.patrons.GetPatronTransactionHistoryResponseDto;
 import com.example.suka_bapak.entity.PatronEntity;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -21,5 +25,6 @@ public interface PatronService {
 
     void deletePatron (Long id);
 
+    ResponseEntity<List<GetPatronTransactionHistoryResponseDto>> getTransactionHistory(Long id);
 }
 
