@@ -74,10 +74,15 @@ public class PatronServiceImpl implements PatronService {
         {
             throw new ValidationException("Invalid email or missing required fields.");
         }
+        String email = request.getEmail();
+        if(email == null ||!email.contains("@")){
+            throw new ValidationException("Invalid email. Email must contain '@'.");
+        }
         if (patronRepository.existsByEmail(request.getEmail())) {
             throw new ValidationException("Email must be unique.");
         }
-        if (request.getMembership_type() != "regular" || request.getMembership_type() != "premium") {
+        String membershipType = request.getMembership_type();
+        if (!"regular".equals(membershipType) ||  !"premium".equals(membershipType)) {
             throw new ValidationException("Membership type must be either regular or premium.");
         }
     }

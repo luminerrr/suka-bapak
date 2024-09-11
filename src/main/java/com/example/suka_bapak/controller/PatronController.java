@@ -65,4 +65,19 @@ public class PatronController {
         }
     }
 
+
+//    Delete patron
+    @DeleteMapping("/{patron_id}")
+    public ResponseEntity<?> deletePatron(
+            @PathVariable("patron_id") Long id,
+            @RequestBody CreatePatronRequest createPatronRequest) {
+        try {
+            patronService.deletePatron(id, createPatronRequest);
+            return new ResponseEntity<>(Map.of("message", "Patron deleted successfully."), HttpStatus.OK);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(Map.of("error", "Patron not found."), HttpStatus.NOT_FOUND);
+        }
+    }
 }
