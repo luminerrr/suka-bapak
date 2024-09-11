@@ -45,5 +45,4 @@ public class BookEntity {
     @Column(nullable = true)
     @JsonProperty("updated_at")
     private LocalDate updated_at;
-
 }
