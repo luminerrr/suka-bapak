@@ -62,35 +62,29 @@ public class BookServiceImpl implements BookService {
         book.setUpdated_at(LocalDate.from(timeNow));
 
         BookEntity saved = bookRepository.save(book);
-        try {
-            return new ResponseEntity<>(Map.of(
-                    "id", saved.getId(),
-                    "title", saved.getTitle(),
-                    "available_copies", saved.getAvailable_copies()), HttpStatus.CREATED);
-        } catch (ValidationException e) {
-            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>(Map.of(
+                "id", saved.getId(),
+                "title", saved.getTitle(),
+                "available_copies", saved.getAvailable_copies()), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Object> updateBook(Long id, CreateBookRequest createBookRequest) {
-        LocalDateTime timeNow = LocalDateTime.now();
         BookEntity existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
+
         existingBook.setTitle(createBookRequest.getTitle());
-        existingBook.setIsbn(createBookRequest.getIsbn());
         existingBook.setAuthor(createBookRequest.getAuthor());
         existingBook.setQuantity(createBookRequest.getQuantity());
-        existingBook.setCreated_at(LocalDate.from(timeNow));
-        existingBook.setUpdated_at(LocalDate.from(timeNow));
+        existingBook.setUpdated_at(LocalDate.now());
 
         try {
             bookRepository.save(existingBook);
             return new ResponseEntity<>(Map.of("message", "Book details updated successfully."), HttpStatus.OK);
         } catch (ValidationException e) {
             return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(Map.of("error", "Book not found."), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(Map.of("error", "An error occurred."), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
