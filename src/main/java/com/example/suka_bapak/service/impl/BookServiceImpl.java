@@ -16,6 +16,9 @@ import com.example.suka_bapak.mapper.BookMapper;
 import com.example.suka_bapak.repository.BookRepository;
 import com.example.suka_bapak.service.BookService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Service
 public class BookServiceImpl implements BookService {
     @Autowired
@@ -33,9 +36,15 @@ public class BookServiceImpl implements BookService {
         return new ResponseEntity<>(bookPageDto, HttpStatus.OK);
     }
 
+    public BookEntity getBookById(Long id) {
+        return bookRepository.findById(id).orElse(null);
+    }
+
     @Override
     public BookEntity createBook(CreateBookRequest createBookRequest) {
         validateBookRequest(createBookRequest);
+
+        LocalDateTime timeNow = LocalDateTime.now();
 
         BookEntity book = new BookEntity();
         book.setTitle(createBookRequest.getTitle());
@@ -43,18 +52,23 @@ public class BookServiceImpl implements BookService {
         book.setIsbn(createBookRequest.getIsbn());
         book.setQuantity(createBookRequest.getQuantity());
         book.setAvailable_copies(createBookRequest.getQuantity());
+        book.setCreated_at(LocalDate.from(timeNow));
+        book.setUpdated_at(LocalDate.from(timeNow));
 
         return bookRepository.save(book);
     }
 
     @Override
     public BookEntity updateBook(Long id, CreateBookRequest createBookRequest) {
+        LocalDateTime timeNow = LocalDateTime.now();
         BookEntity existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
         existingBook.setTitle(createBookRequest.getTitle());
         existingBook.setIsbn(createBookRequest.getIsbn());
         existingBook.setAuthor(createBookRequest.getAuthor());
         existingBook.setQuantity(createBookRequest.getQuantity());
+        existingBook.setCreated_at(LocalDate.from(timeNow));
+        existingBook.setUpdated_at(LocalDate.from(timeNow));
 
         return bookRepository.save(existingBook);
     }
