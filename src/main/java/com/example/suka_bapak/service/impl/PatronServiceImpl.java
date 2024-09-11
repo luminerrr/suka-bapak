@@ -9,6 +9,8 @@ import com.example.suka_bapak.repository.PatronRepository;
 import com.example.suka_bapak.service.PatronService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +47,15 @@ public class PatronServiceImpl implements PatronService {
     public PatronEntity createPatron(CreatePatronRequest createPatronRequest) {
         validatePatronRequest(createPatronRequest);
 
+        LocalDateTime timeNow = LocalDateTime.now();
+
         PatronEntity patron = new PatronEntity();
         patron.setName(createPatronRequest.getName());
         patron.setEmail(createPatronRequest.getEmail());
         patron.setMembership_type(createPatronRequest.getMembership_type());
+        patron.setCreated_at(LocalDate.from(timeNow));
+        patron.setUpdated_at(LocalDate.from(timeNow));
+
 
         return patronRepository.save(patron);
     }
@@ -90,7 +97,7 @@ public class PatronServiceImpl implements PatronService {
             throw new ValidationException("Email must be unique.");
         }
         String membershipType = request.getMembership_type();
-        if (!"regular".equals(membershipType) ||  !"premium".equals(membershipType)) {
+        if (membershipType == null || (!"regular".equals(membershipType) && !"premium".equals(membershipType))) {
             throw new ValidationException("Membership type must be either regular or premium.");
         }
     }

@@ -62,26 +62,39 @@ public class BookServiceImpl implements BookService {
         book.setUpdated_at(LocalDate.from(timeNow));
 
         BookEntity saved = bookRepository.save(book);
-        try {
+//        try {
             return new ResponseEntity<>(Map.of(
                     "id", saved.getId(),
                     "title", saved.getTitle(),
                     "available_copies", saved.getAvailable_copies()), HttpStatus.CREATED);
-        } catch (ValidationException e) {
-            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+//        }
+//        catch (ValidationException e) {
+//            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+//        }
     }
 
     @Override
     public ResponseEntity<Object> updateBook(Long id, CreateBookRequest createBookRequest) {
         LocalDateTime timeNow = LocalDateTime.now();
+
+        // Fetch the existing book
         BookEntity existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
-        existingBook.setTitle(createBookRequest.getTitle());
-        existingBook.setIsbn(createBookRequest.getIsbn());
-        existingBook.setAuthor(createBookRequest.getAuthor());
-        existingBook.setQuantity(createBookRequest.getQuantity());
-        existingBook.setCreated_at(LocalDate.from(timeNow));
+
+        // Update only the fields provided in the request
+        if (createBookRequest.getTitle() != null && !createBookRequest.getTitle().trim().isEmpty()) {
+            existingBook.setTitle(createBookRequest.getTitle());
+        }
+
+        if (createBookRequest.getAuthor() != null && !createBookRequest.getAuthor().trim().isEmpty()) {
+            existingBook.setAuthor(createBookRequest.getAuthor());
+        }
+
+        if (createBookRequest.getQuantity() != 0 && createBookRequest.getQuantity() > 0) {
+            existingBook.setQuantity(createBookRequest.getQuantity());
+            existingBook.setAvailable_copies(createBookRequest.getQuantity());
+        }
+
         existingBook.setUpdated_at(LocalDate.from(timeNow));
 
         try {
