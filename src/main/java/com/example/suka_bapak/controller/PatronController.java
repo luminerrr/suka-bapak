@@ -1,7 +1,9 @@
 package com.example.suka_bapak.controller;
 
 import com.example.suka_bapak.dto.request.patrons.CreatePatronRequest;
+import com.example.suka_bapak.dto.response.patrons.GetOngoingBorrowResponseDto;
 import com.example.suka_bapak.dto.response.patrons.GetPatronDto;
+import com.example.suka_bapak.dto.response.patrons.GetPatronTransactionHistoryResponseDto;
 import com.example.suka_bapak.entity.PatronEntity;
 import com.example.suka_bapak.exception.ValidationException;
 import com.example.suka_bapak.service.PatronService;
@@ -12,7 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 @RestController
 @RequestMapping("/api/patrons")
@@ -21,13 +26,13 @@ public class PatronController {
     @Autowired
     private PatronService patronService;
 
-    // Get all patrons
+//    Get all patrons
     @GetMapping
     public ResponseEntity<Page<GetPatronDto>> getAllPatrons(Pageable page) {
         return patronService.getAllPatrons(page);
     }
 
-    // Get patron by a certain id
+    //    Get patron by a certain id
     @GetMapping("/{patron_id}")
     public ResponseEntity<PatronEntity> getPatronById(
             @PathVariable Long patron_id
@@ -43,28 +48,35 @@ public class PatronController {
 
 //    Create new patron
     @PostMapping
-    public ResponseEntity<PatronEntity> createPatron(
-            @RequestBody CreatePatronRequest patron) {
-        PatronEntity savedPatron = patronService.createPatron(patron);
-        return ResponseEntity.ok(savedPatron);
+    public ResponseEntity<Object> addPatron(
+            @RequestBody CreatePatronRequest createPatronRequest
+    ){
+        return patronService.createPatron(createPatronRequest);
     }
 
-    // Update patron
+//    Update patron
     @PutMapping("/{patron_id}")
-    public ResponseEntity<Object> updatePatron(
-            @PathVariable("patron_id") Long id,
+    public ResponseEntity<?> updatePatron(
+            @PathVariable ("patron_id") Long id,
             @RequestBody CreatePatronRequest createPatronRequest) {
-        return patronService.updatePatron(id, createPatronRequest);
+        try {
+            patronService.updatePatron(id, createPatronRequest);
+            return new ResponseEntity<>(Map.of("message", "Patron details updated successfully."), HttpStatus.OK);
+        } catch (ValidationException e) {
+            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(Map.of("error", "Patron not found."), HttpStatus.NOT_FOUND);
+        }
     }
 
 
 //    Delete patron
     @DeleteMapping("/{patron_id}")
     public ResponseEntity<?> deletePatron(
-            @PathVariable("patron_id") Long id,
-            @RequestBody CreatePatronRequest createPatronRequest) {
+            @PathVariable("patron_id") Long id
+            ) {
         try {
-            patronService.deletePatron(id, createPatronRequest);
+            patronService.deletePatron(id);
             return new ResponseEntity<>(Map.of("message", "Patron deleted successfully."), HttpStatus.OK);
         } catch (ValidationException e) {
             return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -72,4 +84,19 @@ public class PatronController {
             return new ResponseEntity<>(Map.of("error", "Patron not found."), HttpStatus.NOT_FOUND);
         }
     }
+
+    @GetMapping("/{patron_id}/borrow_history")
+    public ResponseEntity<List<GetPatronTransactionHistoryResponseDto>> getTransactionHistory(
+        @PathVariable("patron_id") Long id
+        ) {
+        return patronService.getTransactionHistory(id);
+    }
+
+    @GetMapping("/{patron_id}/current_borrowings")
+    public ResponseEntity<List<GetOngoingBorrowResponseDto>> getOngoingTransactions(
+        @PathVariable("patron_id") Long id
+        ) {
+        return patronService.getOngoingBorrows(id);
+    }
+    
 }

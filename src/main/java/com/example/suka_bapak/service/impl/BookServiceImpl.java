@@ -1,7 +1,10 @@
 package com.example.suka_bapak.service.impl;
 
+import com.example.suka_bapak.constant.GeneralConstant;
 import com.example.suka_bapak.dto.request.books.CreateBookRequest;
 import com.example.suka_bapak.exception.ValidationException;
+import com.example.suka_bapak.repository.TransactionRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.Page;
@@ -11,13 +14,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.suka_bapak.dto.response.books.GetBooksDto;
+import com.example.suka_bapak.dto.response.books.GetOverdueBooksResponseDto;
 import com.example.suka_bapak.entity.BookEntity;
+import com.example.suka_bapak.entity.TransactionEntity;
 import com.example.suka_bapak.mapper.BookMapper;
 import com.example.suka_bapak.repository.BookRepository;
+import com.example.suka_bapak.repository.PatronRepository;
 import com.example.suka_bapak.service.BookService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -27,6 +37,9 @@ public class BookServiceImpl implements BookService {
 
     @Autowired
     private BookMapper bookMapper;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Override
     public ResponseEntity<Page<GetBooksDto>> getAllBooks(Pageable page) {
@@ -56,48 +69,29 @@ public class BookServiceImpl implements BookService {
         book.setUpdated_at(LocalDate.from(timeNow));
 
         BookEntity saved = bookRepository.save(book);
-//        try {
-            return new ResponseEntity<>(Map.of(
-                    "id", saved.getId(),
-                    "title", saved.getTitle(),
-                    "available_copies", saved.getAvailable_copies()), HttpStatus.CREATED);
-//        }
-//        catch (ValidationException e) {
-//            return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
-//        }
+        return new ResponseEntity<>(Map.of(
+                "id", saved.getId(),
+                "title", saved.getTitle(),
+                "available_copies", saved.getAvailable_copies()), HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Object> updateBook(Long id, CreateBookRequest createBookRequest) {
-        LocalDateTime timeNow = LocalDateTime.now();
-
-        // Fetch the existing book
         BookEntity existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
 
-        // Update only the fields provided in the request
-        if (createBookRequest.getTitle() != null && !createBookRequest.getTitle().trim().isEmpty()) {
-            existingBook.setTitle(createBookRequest.getTitle());
-        }
-
-        if (createBookRequest.getAuthor() != null && !createBookRequest.getAuthor().trim().isEmpty()) {
-            existingBook.setAuthor(createBookRequest.getAuthor());
-        }
-
-        if (createBookRequest.getQuantity() != 0 && createBookRequest.getQuantity() > 0) {
-            existingBook.setQuantity(createBookRequest.getQuantity());
-            existingBook.setAvailable_copies(createBookRequest.getQuantity());
-        }
-
-        existingBook.setUpdated_at(LocalDate.from(timeNow));
+        existingBook.setTitle(createBookRequest.getTitle());
+        existingBook.setAuthor(createBookRequest.getAuthor());
+        existingBook.setQuantity(createBookRequest.getQuantity());
+        existingBook.setUpdated_at(LocalDate.now());
 
         try {
             bookRepository.save(existingBook);
             return new ResponseEntity<>(Map.of("message", "Book details updated successfully."), HttpStatus.OK);
         } catch (ValidationException e) {
             return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(Map.of("error", "Book not found."), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(Map.of("error", "An error occurred."), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -113,5 +107,57 @@ public class BookServiceImpl implements BookService {
         if (request.getQuantity() <= 0) {
             throw new ValidationException("Quantity must be a positive integer.");
         }
+    }
+
+    public void deleteBook(Long bookId) throws ValidationException {
+        BookEntity book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found with id: " + bookId));
+
+        boolean hasActiveLoans = transactionRepository.existsByBookIdAndReturnDateIsNull(bookId);
+        if (hasActiveLoans) {
+            throw new ValidationException("Cannot delete book with active loans.");
+        }
+
+        bookRepository.delete(book);
+    }
+
+    @Override
+    public ResponseEntity<List<GetOverdueBooksResponseDto>> getOverdueBooks() {
+        LocalDate today = LocalDate.now();
+        List<TransactionEntity> overdueTransactions = transactionRepository.findByDueDateBefore(today);
+        List<GetOverdueBooksResponseDto> response = new ArrayList<>();
+        // Map from entity to dto and count overdue days & fees
+        for (TransactionEntity transaction : overdueTransactions) {
+            GetOverdueBooksResponseDto dto = new GetOverdueBooksResponseDto();
+            dto.setBookTitle(transaction.getBook().getTitle());
+            dto.setPatronName(transaction.getPatron().getName());
+            dto.setDueDate(transaction.getDueDate());
+            Long overdue = ChronoUnit.DAYS.between(transaction.getDueDate(), LocalDate.now());
+            overdue = overdue > 0 ? overdue : 0;
+            dto.setDaysOverdue(overdue.intValue());
+            Double fine = overdue * GeneralConstant.FINE_FEE_PER_DAY;
+            dto.setFine(fine);
+            response.add(dto);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<Object> checkBookAvailability(Long book_id) {
+        BookEntity book = bookRepository.findById(book_id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        // Get the number of books currently borrowed (active loans)
+        int activeLoans = transactionRepository.countByBook_IdAndReturnDateIsNull(book_id);
+
+        // Calculate available copies
+        int availableCopies = book.getQuantity() - activeLoans;
+
+        // Create the response
+        Map<String, Object> response = new HashMap<>();
+        response.put("book_title", book.getTitle());
+        response.put("available_copies", availableCopies);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
