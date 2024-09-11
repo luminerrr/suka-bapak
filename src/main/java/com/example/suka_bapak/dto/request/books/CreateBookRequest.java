@@ -1,4 +1,4 @@
-package com.example.suka_bapak.dto.request;
+package com.example.suka_bapak.dto.request.books;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

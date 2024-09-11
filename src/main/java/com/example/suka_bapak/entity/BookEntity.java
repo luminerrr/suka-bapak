@@ -38,11 +38,11 @@ public class BookEntity {
     @JsonProperty("available_copies")
     private int available_copies;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @JsonProperty("created_at")
     private LocalDate created_at;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @JsonProperty("updated_at")
     private LocalDate updated_at;
 

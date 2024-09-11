@@ -1,6 +1,6 @@
 package com.example.suka_bapak.service;
 
-import com.example.suka_bapak.dto.request.CreateBookRequest;
+import com.example.suka_bapak.dto.request.books.CreateBookRequest;
 import com.example.suka_bapak.entity.BookEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +17,7 @@ public interface BookService {
 
     BookEntity updateBook(Long id, CreateBookRequest createBookRequest);
 
+    BookEntity getBookById(Long id);
 }
 
 
