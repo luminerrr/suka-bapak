@@ -1,7 +1,7 @@
 package com.example.suka_bapak.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -30,20 +30,20 @@ public class TransactionEntity implements Serializable {
     // borrow_date
     @Column(name = "borrow_date")
     @JsonProperty("borrow_date")
-    private Date borrowDate;
+    private LocalDate borrowDate;
     
     // due date
     @Column(name = "due_date")
     @JsonProperty("due_date")
-    private Date dueDate;
+    private LocalDate dueDate;
     
     // return date
-    @Column(name = "return_date")
+    @Column(name = "return_date", nullable = true)
     @JsonProperty("return_date")
-    private Date returnDate;
+    private LocalDate returnDate;
 
     // fine
     @Column(name = "fine")
     @JsonProperty("fine")
-    private Float fine;
+    private Double fine;
 }
